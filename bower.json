@@ -1,0 +1,22 @@
+{
+  "name": "physics_sim",
+  "description": "",
+  "main": "main.js",
+  "authors": [
+    "Darien Lombardi <darien.lombardi@gmail.com>"
+  ],
+  "license": "ISC",
+  "moduleType": [],
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "app/bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "^2.2.3"
+  }
+}
