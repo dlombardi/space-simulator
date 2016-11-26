@@ -24,7 +24,7 @@ class celestialObj{
    }
    generateRadius(){
      let prob = Math.random() * 10;
-     let radius = prob < 6.6 ? Math.floor(Math.random() * 1000) : Math.floor(Math.random() * 2000);
+     let radius = prob < 6.6 ? Math.floor(Math.random() * 1000) : Math.floor(Math.random() * 3000);
      return radius;
    }
    randomComposition(volume, customElements){
@@ -74,7 +74,6 @@ class celestialObj{
      if(this.drawRad < 50){
        this.drawRad += p.drawRad;
      }
-     console.log("after merge: ", this.gravMass);
    }
    drawPlanet(screen){
      var ctx = $('#canvas')[0].getContext("2d");
@@ -83,6 +82,12 @@ class celestialObj{
      ctx.fillStyle = this.color.toString();
      ctx.fill();
    }
+   isPointInside(x,y){
+     var dx = this.x - x;
+     var dy = this.y - y;
+     return( Math.pow(dx, 2) + Math.pow(dy, 2) <= Math.pow(this.radius, 2));
+    }
+
 };
 
 
