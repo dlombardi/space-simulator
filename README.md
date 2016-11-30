@@ -1,3 +1,3 @@
 # Gravity Simulator and Planet Creation Sandbox
 
-![alt text](http://imgur.com/iDXmKgq)
+![alt text](https://i.imgur.com/iDXmKgq.png)
