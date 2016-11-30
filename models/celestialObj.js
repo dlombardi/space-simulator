@@ -11,8 +11,8 @@ class celestialObj{
      this.drawRad = Math.cbrt((this.radius / 2));
      this.volume = ((4 * Math.PI) * Math.pow(this.radius, 3))/3;
      this.density = this.randomComposition(this.volume);
-     this.mass = this.density.total * this.volume;
-     this.gravMass = this.mass * .000000000000000001
+     this.mass = this.massCalc(this.density);
+     this.gravMass = this.mass * .00000001
      this.color = spec.color ? spec.color : '#' + Math.floor(Math.random()*16777215).toString(16);
      this.width = this.radius * 2;
      this.height = this.width;
@@ -37,30 +37,67 @@ class celestialObj{
      return this.percentageComp(100.00, randomChunk[1], volume)
    }
    percentageComp(percentage, elements, volume){
-     let density = {
-       total: 0,
-     };
+     let finalElements = [];
      elements.forEach((elem, i) => {
        if(percentage > 0){
          let random = _.random(1, percentage);
          percentage = percentage - random;
-         density[elem.name] = {
+         let elementObj = {
+           name: elem.name,
            symbol: elem.symbol,
            density: elem.density,
-           percentage: `%${(random)}`
+           percentage: `${(random)}%`,
+           percentageVal: random
          }
-         let percentageOfVolume = ((random / 100) * volume);
-         density.total += percentageOfVolume * elem.density.split(" ")[0];
+         let portionOfVolume = ((random / 100) * volume);
+         elementObj.portionOfMass = portionOfVolume * Number(elem.density.split(" ")[0]);
+         finalElements.push(elementObj);
        }
      });
-     return density;
+     return _.sortBy(finalElements, 'percentageVal').reverse();
    }
+
+   massCalc(density){
+     return density.reduce((acc, curr) => {
+       return acc + curr.portionOfMass;
+     }, 0);
+   }
+
+   compMerge(p1Elems, p2Elems){
+     p2Elems.forEach(elem => {
+       let p1Index = _.findIndex(p1Elems, { name: elem.name });
+       if(p1Index === -1){
+         p1Elems.push(elem);
+       } else {
+         p1Elems[p1Index].portionOfMass += elem.portionOfMass;
+       }
+     });
+
+     let massSum = p1Elems.reduce((acc, curr) => {
+       return acc + curr.portionOfMass;
+     }, 0);
+
+     let finalElements = p1Elems.map(elem => {
+       let percentage = ((elem.portionOfMass / this.mass) * 100);
+
+       return {
+         name: elem.name,
+         symbol: elem.symbol,
+         density: elem.density,
+         percentage: `${percentage.toFixed(3)}%`,
+         percentageVal: percentage,
+         portionOfMass: elem.portionOfMass,
+       }
+     });
+     return _.sortBy(finalElements, 'percentageVal').reverse();
+   }
+
    mergePlanet(p){
-     console.log("before merge: ", this.x, this.y, p.x, p.y);
-     console.log("before merge: ", this.gravMass, p.gravMass);
-     if(this.mass < p.mass){
+
+     if(this.radius < p.radius){
        this.color = p.color;
      }
+
      this.velocity.x = ((this.velocity.x * this.gravMass) + (p.velocity.x * p.gravMass)) / (this.gravMass + p.gravMass);
      this.velocity.y = ((this.velocity.y * this.gravMass) + (p.velocity.y * p.gravMass)) / (this.gravMass + p.gravMass);
      this.x = (this.x * this.gravMass + p.x * p.gravMass) / (this.gravMass + p.gravMass);
@@ -68,13 +105,15 @@ class celestialObj{
      this.mass += p.mass;
      this.radius += p.radius;
      this.volume += p.volume;
+     this.density = this.compMerge(_.values(this.density), _.values(p.density));
      this.gravMass += p.gravMass;
      this.width = p.radius * 2;
      this.height = p.width;
-     if(this.drawRad < 50){
+     if(this.drawRad < 100){
        this.drawRad += p.drawRad;
      }
    }
+
    drawPlanet(screen){
      var ctx = $('#canvas')[0].getContext("2d");
      ctx.beginPath();

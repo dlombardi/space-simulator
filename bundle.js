@@ -46,8 +46,6 @@
 
 	'use strict';
 
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
 	var _celestialObj = __webpack_require__(1);
 
 	var _celestialObj2 = _interopRequireDefault(_celestialObj);
@@ -83,17 +81,20 @@
 	}
 
 	function renderPlanetInfo(planet) {
+
 	  $('#info-table').empty();
-	  var tableContent = '\n          <table>\n            <caption>Planet Info</caption>\n            <tbody>\n              <tr>\n                <td>Radius</td>\n                <td>' + planet.radius.toLocaleString('en-US', { minimumFractionDigits: 2 }) + ' km</td>\n              </tr>\n              <tr>\n                <td>Volume</td>\n                <td>' + planet.volume.toLocaleString('en-US', { minimumFractionDigits: 2 }) + ' km<sup>3</sup></td>\n              </tr>\n              <tr>\n                <td>Density</td>\n                <td>' + planet.density.total.toLocaleString('en-US', { minimumFractionDigits: 2 }) + '</td>\n              </tr>\n              <tr>\n                <td>Mass</td>\n                <td>' + planet.mass.toExponential() + ' g/cm<sup>3</sup></td>\n              </tr>\n              <tr>\n                <table id="planet-composition">\n                  <caption>Composition</caption>\n                </table>\n              </tr>\n            </tbody>\n          </table>\n          ';
+
+	  var tableContent = '\n    <table>\n      <caption>Planet Info</caption>\n      <tbody>\n        <tr>\n          <td>Radius</td>\n          <td>' + planet.radius.toLocaleString('en-US', { minimumFractionDigits: 2 }) + ' km</td>\n        </tr>\n        <tr>\n          <td>Volume</td>\n          <td>' + planet.volume.toLocaleString('en-US', { minimumFractionDigits: 2 }) + ' km<sup>3</sup></td>\n        </tr>\n        <tr>\n          <td>Mass</td>\n          <td>' + planet.mass.toExponential() + ' g/cm<sup>3</sup></td>\n        </tr>\n        <tr>\n          <table id="planet-composition">\n            <caption>Composition</caption>\n            <tr>\n              <td>Name</td>\n              <td>Symbol</td>\n              <td>Percentage</td>\n            </tr>\n          </table>\n        </tr>\n      </tbody>\n    </table>\n  ';
 
 	  $('#info-table').append(tableContent);
 
-	  for (var prop in planet.density) {
-	    if (_typeof(planet.density[prop]) === 'object') {
-	      var compositionString = '\n        <tr>\n          <td>' + prop + '</td>\n          <td>Density</td>\n          <td>' + planet.density[prop].density + '</td>\n        </tr>\n        <tr>\n          <td></td>\n          <td>Percentage</td>\n          <td>' + planet.density[prop].percentage + '</td>\n        </tr>\n        <tr>\n          <td></td>\n          <td>Symbol</td>\n          <td>' + planet.density[prop].symbol + '</td>\n        </tr>\n      ';
-	      $('#planet-composition').append(compositionString);
-	    }
-	  }
+	  var elements = _.sortBy(planet.density, 'percentageVal').reverse();
+	  console.log("elements: ", elements);
+
+	  elements.forEach(function (elem) {
+	    var compositionString = '\n      <tr>\n        <td>' + elem.name + '</td>\n        <td>' + elem.symbol + '</td>\n        <td>' + elem.percentage + '</td>\n      </tr>\n    ';
+	    $('#planet-composition').append(compositionString);
+	  });
 	}
 
 	function Vector(x, y) {
@@ -169,11 +170,11 @@
 	  $("#canvas").mousedown(function (e) {
 	    stopCreation = false;
 	    if (e.which == 2 || shiftPressed) {
+	      stopCreation = true;
 	      e.preventDefault();
 	      planets.forEach(function (planet) {
 	        if (planet.isPointInside(mouseInitX, mouseInitX)) {
 	          renderPlanetInfo(planet);
-	          stopCreation = true;
 	        }
 	      });
 	    }
@@ -263,8 +264,8 @@
 	    this.drawRad = Math.cbrt(this.radius / 2);
 	    this.volume = 4 * Math.PI * Math.pow(this.radius, 3) / 3;
 	    this.density = this.randomComposition(this.volume);
-	    this.mass = this.density.total * this.volume;
-	    this.gravMass = this.mass * .000000000000000001;
+	    this.mass = this.massCalc(this.density);
+	    this.gravMass = this.mass * .00000001;
 	    this.color = spec.color ? spec.color : '#' + Math.floor(Math.random() * 16777215).toString(16);
 	    this.width = this.radius * 2;
 	    this.height = this.width;
@@ -296,32 +297,72 @@
 	  }, {
 	    key: 'percentageComp',
 	    value: function percentageComp(percentage, elements, volume) {
-	      var density = {
-	        total: 0
-	      };
+	      var finalElements = [];
 	      elements.forEach(function (elem, i) {
 	        if (percentage > 0) {
 	          var random = _lodash2.default.random(1, percentage);
 	          percentage = percentage - random;
-	          density[elem.name] = {
+	          var elementObj = {
+	            name: elem.name,
 	            symbol: elem.symbol,
 	            density: elem.density,
-	            percentage: '%' + random
+	            percentage: random + '%',
+	            percentageVal: random
 	          };
-	          var percentageOfVolume = random / 100 * volume;
-	          density.total += percentageOfVolume * elem.density.split(" ")[0];
+	          var portionOfVolume = random / 100 * volume;
+	          elementObj.portionOfMass = portionOfVolume * Number(elem.density.split(" ")[0]);
+	          finalElements.push(elementObj);
 	        }
 	      });
-	      return density;
+	      return _lodash2.default.sortBy(finalElements, 'percentageVal').reverse();
+	    }
+	  }, {
+	    key: 'massCalc',
+	    value: function massCalc(density) {
+	      return density.reduce(function (acc, curr) {
+	        return acc + curr.portionOfMass;
+	      }, 0);
+	    }
+	  }, {
+	    key: 'compMerge',
+	    value: function compMerge(p1Elems, p2Elems) {
+	      var _this = this;
+
+	      p2Elems.forEach(function (elem) {
+	        var p1Index = _lodash2.default.findIndex(p1Elems, { name: elem.name });
+	        if (p1Index === -1) {
+	          p1Elems.push(elem);
+	        } else {
+	          p1Elems[p1Index].portionOfMass += elem.portionOfMass;
+	        }
+	      });
+
+	      var massSum = p1Elems.reduce(function (acc, curr) {
+	        return acc + curr.portionOfMass;
+	      }, 0);
+
+	      var finalElements = p1Elems.map(function (elem) {
+	        var percentage = elem.portionOfMass / _this.mass * 100;
+
+	        return {
+	          name: elem.name,
+	          symbol: elem.symbol,
+	          density: elem.density,
+	          percentage: percentage.toFixed(3) + '%',
+	          percentageVal: percentage,
+	          portionOfMass: elem.portionOfMass
+	        };
+	      });
+	      return _lodash2.default.sortBy(finalElements, 'percentageVal').reverse();
 	    }
 	  }, {
 	    key: 'mergePlanet',
 	    value: function mergePlanet(p) {
-	      console.log("before merge: ", this.x, this.y, p.x, p.y);
-	      console.log("before merge: ", this.gravMass, p.gravMass);
-	      if (this.mass < p.mass) {
+
+	      if (this.radius < p.radius) {
 	        this.color = p.color;
 	      }
+
 	      this.velocity.x = (this.velocity.x * this.gravMass + p.velocity.x * p.gravMass) / (this.gravMass + p.gravMass);
 	      this.velocity.y = (this.velocity.y * this.gravMass + p.velocity.y * p.gravMass) / (this.gravMass + p.gravMass);
 	      this.x = (this.x * this.gravMass + p.x * p.gravMass) / (this.gravMass + p.gravMass);
@@ -329,10 +370,11 @@
 	      this.mass += p.mass;
 	      this.radius += p.radius;
 	      this.volume += p.volume;
+	      this.density = this.compMerge(_lodash2.default.values(this.density), _lodash2.default.values(p.density));
 	      this.gravMass += p.gravMass;
 	      this.width = p.radius * 2;
 	      this.height = p.width;
-	      if (this.drawRad < 50) {
+	      if (this.drawRad < 100) {
 	        this.drawRad += p.drawRad;
 	      }
 	    }
