@@ -81,12 +81,17 @@
 	}
 
 	function renderPlanetInfo(planet) {
+
 	  $('#info-table').empty();
-	  var tableContent = '\n          <table>\n            <caption>Planet Info</caption>\n            <tbody>\n              <tr>\n                <td>Radius</td>\n                <td>' + planet.radius.toLocaleString('en-US', { minimumFractionDigits: 2 }) + ' km</td>\n              </tr>\n              <tr>\n                <td>Volume</td>\n                <td>' + planet.volume.toLocaleString('en-US', { minimumFractionDigits: 2 }) + ' km<sup>3</sup></td>\n              </tr>\n              <tr>\n                <td>Mass</td>\n                <td>' + planet.mass.toExponential() + ' g/cm<sup>3</sup></td>\n              </tr>\n              <tr>\n                <table id="planet-composition">\n                  <caption>Composition</caption>\n                  <tr>\n                    <td>Name</td>\n                    <td>Symbol</td>\n                    <td>Percentage</td>\n                  </tr>\n                </table>\n              </tr>\n            </tbody>\n          </table>\n          ';
+
+	  var tableContent = '\n    <table>\n      <caption>Planet Info</caption>\n      <tbody>\n        <tr>\n          <td>Radius</td>\n          <td>' + planet.radius.toLocaleString('en-US', { minimumFractionDigits: 2 }) + ' km</td>\n        </tr>\n        <tr>\n          <td>Volume</td>\n          <td>' + planet.volume.toLocaleString('en-US', { minimumFractionDigits: 2 }) + ' km<sup>3</sup></td>\n        </tr>\n        <tr>\n          <td>Mass</td>\n          <td>' + planet.mass.toExponential() + ' g/cm<sup>3</sup></td>\n        </tr>\n        <tr>\n          <table id="planet-composition">\n            <caption>Composition</caption>\n            <tr>\n              <td>Name</td>\n              <td>Symbol</td>\n              <td>Percentage</td>\n            </tr>\n          </table>\n        </tr>\n      </tbody>\n    </table>\n  ';
 
 	  $('#info-table').append(tableContent);
 
-	  planet.density.forEach(function (elem) {
+	  var elements = _.sortBy(planet.density, 'percentageVal').reverse();
+	  console.log("elements: ", elements);
+
+	  elements.forEach(function (elem) {
 	    var compositionString = '\n      <tr>\n        <td>' + elem.name + '</td>\n        <td>' + elem.symbol + '</td>\n        <td>' + elem.percentage + '</td>\n      </tr>\n    ';
 	    $('#planet-composition').append(compositionString);
 	  });
@@ -292,23 +297,24 @@
 	  }, {
 	    key: 'percentageComp',
 	    value: function percentageComp(percentage, elements, volume) {
-	      var density = [];
+	      var finalElements = [];
 	      elements.forEach(function (elem, i) {
 	        if (percentage > 0) {
 	          var random = _lodash2.default.random(1, percentage);
 	          percentage = percentage - random;
-	          var planetDensity = {
+	          var elementObj = {
 	            name: elem.name,
 	            symbol: elem.symbol,
 	            density: elem.density,
-	            percentage: random + '%'
+	            percentage: random + '%',
+	            percentageVal: random
 	          };
 	          var portionOfVolume = random / 100 * volume;
-	          planetDensity.portionOfMass = portionOfVolume * Number(elem.density.split(" ")[0]);
-	          density.push(planetDensity);
+	          elementObj.portionOfMass = portionOfVolume * Number(elem.density.split(" ")[0]);
+	          finalElements.push(elementObj);
 	        }
 	      });
-	      return density;
+	      return _lodash2.default.sortBy(finalElements, 'percentageVal').reverse();
 	    }
 	  }, {
 	    key: 'massCalc',
@@ -331,39 +337,32 @@
 	        }
 	      });
 
-	      var density = [];
+	      var massSum = p1Elems.reduce(function (acc, curr) {
+	        return acc + curr.portionOfMass;
+	      }, 0);
 
-	      p1Elems.forEach(function (elem) {
+	      var finalElements = p1Elems.map(function (elem) {
 	        var percentage = elem.portionOfMass / _this.mass * 100;
-	        console.log(elem.name, percentage);
 
-	        //  if(percentage === "NaN" || !percentage){
-	        //    percentage = parseFloat(0.0001);
-	        //  }
-
-	        var portionOfVolume = percentage / 100 * _this.volume;
-	        elem.portionOfMass = portionOfVolume * Number(elem.density.split(" ")[0]);
-
-	        density[elem.name] = {
+	        return {
 	          name: elem.name,
 	          symbol: elem.symbol,
 	          density: elem.density,
 	          percentage: percentage.toFixed(3) + '%',
+	          percentageVal: percentage,
 	          portionOfMass: elem.portionOfMass
 	        };
 	      });
-	      console.log(p1Elems.length);
-	      return density;
+	      return _lodash2.default.sortBy(finalElements, 'percentageVal').reverse();
 	    }
 	  }, {
 	    key: 'mergePlanet',
 	    value: function mergePlanet(p) {
-	      //  console.log("before merge: ", this.x, this.y, p.x, p.y);
-	      //  console.log("before merge: ", this.gravMass, p.gravMass);
 
-	      if (this.mass < p.mass) {
+	      if (this.radius < p.radius) {
 	        this.color = p.color;
 	      }
+
 	      this.velocity.x = (this.velocity.x * this.gravMass + p.velocity.x * p.gravMass) / (this.gravMass + p.gravMass);
 	      this.velocity.y = (this.velocity.y * this.gravMass + p.velocity.y * p.gravMass) / (this.gravMass + p.gravMass);
 	      this.x = (this.x * this.gravMass + p.x * p.gravMass) / (this.gravMass + p.gravMass);

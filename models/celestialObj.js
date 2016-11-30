@@ -37,23 +37,24 @@ class celestialObj{
      return this.percentageComp(100.00, randomChunk[1], volume)
    }
    percentageComp(percentage, elements, volume){
-     let density = [];
+     let finalElements = [];
      elements.forEach((elem, i) => {
        if(percentage > 0){
          let random = _.random(1, percentage);
          percentage = percentage - random;
-         let planetDensity = {
+         let elementObj = {
            name: elem.name,
            symbol: elem.symbol,
            density: elem.density,
-           percentage: `${(random)}%`
+           percentage: `${(random)}%`,
+           percentageVal: random
          }
          let portionOfVolume = ((random / 100) * volume);
-         planetDensity.portionOfMass = portionOfVolume * Number(elem.density.split(" ")[0]);
-         density.push(planetDensity);
+         elementObj.portionOfMass = portionOfVolume * Number(elem.density.split(" ")[0]);
+         finalElements.push(elementObj);
        }
      });
-     return density;
+     return _.sortBy(finalElements, 'percentageVal').reverse();
    }
 
    massCalc(density){
@@ -72,38 +73,31 @@ class celestialObj{
        }
      });
 
-     let density = [];
+     let massSum = p1Elems.reduce((acc, curr) => {
+       return acc + curr.portionOfMass;
+     }, 0);
 
-     p1Elems.forEach(elem => {
+     let finalElements = p1Elems.map(elem => {
        let percentage = ((elem.portionOfMass / this.mass) * 100);
-       console.log(elem.name, percentage);
 
-      //  if(percentage === "NaN" || !percentage){
-      //    percentage = parseFloat(0.0001);
-      //  }
-
-       let portionOfVolume = ((percentage / 100) * this.volume);
-       elem.portionOfMass = portionOfVolume * Number(elem.density.split(" ")[0]);
-
-       density[elem.name] = {
+       return {
          name: elem.name,
          symbol: elem.symbol,
          density: elem.density,
          percentage: `${percentage.toFixed(3)}%`,
-         portionOfMass: elem.portionOfMass
+         percentageVal: percentage,
+         portionOfMass: elem.portionOfMass,
        }
      });
-     console.log(p1Elems.length);
-     return density;
+     return _.sortBy(finalElements, 'percentageVal').reverse();
    }
 
    mergePlanet(p){
-    //  console.log("before merge: ", this.x, this.y, p.x, p.y);
-    //  console.log("before merge: ", this.gravMass, p.gravMass);
 
-     if(this.mass < p.mass){
+     if(this.radius < p.radius){
        this.color = p.color;
      }
+
      this.velocity.x = ((this.velocity.x * this.gravMass) + (p.velocity.x * p.gravMass)) / (this.gravMass + p.gravMass);
      this.velocity.y = ((this.velocity.y * this.gravMass) + (p.velocity.y * p.gravMass)) / (this.gravMass + p.gravMass);
      this.x = (this.x * this.gravMass + p.x * p.gravMass) / (this.gravMass + p.gravMass);
