@@ -48,3 +48,17 @@ body{
   cursor: pointer;
   outline: none;
 }
+
+#planet-form{
+  z-index: 1000;
+  margin-top: 40px;
+  h1{
+    color: white;
+  }
+  input{
+    margin-top: 10px;
+  }
+  button{
+    margin-top: 10px;
+  }
+}

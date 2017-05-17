@@ -10,7 +10,7 @@ class celestialObj{
      this.radius = spec.kmRadius ? spec.kmRadius : this.generateRadius();
      this.drawRad = Math.cbrt((this.radius / 2));
      this.volume = ((4 * Math.PI) * Math.pow(this.radius, 3))/3;
-     this.density = this.randomComposition(this.volume);
+     this.density = this.randomComposition(this.volume, spec.customElements);
      this.mass = this.massCalc(this.density);
      this.gravMass = this.mass * .00000001
      this.color = spec.color ? spec.color : '#' + Math.floor(Math.random()*16777215).toString(16);
@@ -24,12 +24,12 @@ class celestialObj{
    }
    generateRadius(){
      let prob = Math.random() * 10;
-     let radius = prob < 6.6 ? Math.floor(Math.random() * 1000) : Math.floor(Math.random() * 3000);
+     let radius = prob < 6.6 ? Math.floor(Math.random() * 500) : Math.floor(Math.random() * 1000);
      return radius;
    }
    randomComposition(volume, customElements){
      if(customElements){
-       return this.percentageComp(100.00, customElements, volume);
+       return this.formatCustomElements(customElements);
      }
      let randomNum = Math.floor(Math.random() * 96);
      let randomCollection = _.shuffle(densities);
@@ -121,11 +121,16 @@ class celestialObj{
      ctx.fillStyle = this.color.toString();
      ctx.fill();
    }
+
    isPointInside(x,y){
      var dx = this.x - x;
      var dy = this.y - y;
      return( Math.pow(dx, 2) + Math.pow(dy, 2) <= Math.pow(this.radius, 2));
-    }
+   }
+
+   formatCustomElements(customElements){
+      formatCustomElements
+   }
 
 };
 
