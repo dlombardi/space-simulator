@@ -30,7 +30,7 @@ function newPlanet(spec){
 
 function renderPlanetInfo(planet){
 
-  $('#info-table').empty();
+  $('#planet-info-table').empty();
 
   let tableContent = `
     <table>
@@ -62,10 +62,9 @@ function renderPlanetInfo(planet){
     </table>
   `;
 
-  $('#info-table').append(tableContent);
+  $('#planet-info-table').append(tableContent);
 
   let elements = _.sortBy(planet.density, 'percentageVal').reverse();
-  console.log("elements: ", elements);
 
   elements.forEach(elem => {
     let compositionString = `
@@ -85,17 +84,6 @@ function Vector(x, y){
   this.y = y;
 }
 
-function spawnCluster(){
-  let focal = new Vector(mouseInitX, mouseInitY),
-      radius = 50;
-  for(var i = 0; i < 100; i++){
-    let randomTheta = 2 * Math.PI * Math.random(),
-        u = (Math.random() * 100) + (Math.random() * 100),
-        r = u > 100 ? 200 - u : u,
-        location = new Vector((r * Math.cos(randomTheta)) + focal.x, r * Math.sin(randomTheta) + focal.y);
-    planets.push(newPlanet({null, x: location.x / zoomScale, y: location.y / zoomScale }))
-  }
-}
 
 function drawPlanets(p){
   for(let i = 0; i < p.length; i++){
@@ -148,7 +136,7 @@ $(document).ready((e) => {
   ctx.canvas.height = window.innerHeight;
 
   $("#hide-info-button").click((e) => {
-    $("#info-table").toggle();
+    $("#planet-info-table").toggle();
   })
 
   $("#canvas").mousedown((e) => {
@@ -186,9 +174,6 @@ $(document).ready((e) => {
     if(e.which === 16){
       shiftPressed = true;
     }
-    if(e.which === 32){
-      spawnCluster();
-    }
   });
 
   $('body').keyup(e => {
@@ -209,9 +194,6 @@ $(document).ready((e) => {
     if(running){
       gravityCalc(planets);
       steps++;
-    }
-    if(tracking){
-
     }
   }, 15)
 })

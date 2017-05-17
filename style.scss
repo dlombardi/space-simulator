@@ -12,7 +12,17 @@ body{
   background-color: black;
 }
 
-#info-table{
+#info-container {
+  display: flex;
+  flex-direction: column;
+  #instructions {
+    position: absolute;
+    top: 40px;
+    color: white;
+  }
+}
+
+#planet-info-table{
   border-color: 1px solid white;
   position: absolute;
   z-index: 100;

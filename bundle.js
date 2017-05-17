@@ -82,14 +82,13 @@
 
 	function renderPlanetInfo(planet) {
 
-	  $('#info-table').empty();
+	  $('#planet-info-table').empty();
 
 	  var tableContent = '\n    <table>\n      <caption>Planet Info</caption>\n      <tbody>\n        <tr>\n          <td>Radius</td>\n          <td>' + planet.radius.toLocaleString('en-US', { minimumFractionDigits: 2 }) + ' km</td>\n        </tr>\n        <tr>\n          <td>Volume</td>\n          <td>' + planet.volume.toLocaleString('en-US', { minimumFractionDigits: 2 }) + ' km<sup>3</sup></td>\n        </tr>\n        <tr>\n          <td>Mass</td>\n          <td>' + planet.mass.toExponential() + ' g/cm<sup>3</sup></td>\n        </tr>\n        <tr>\n          <table id="planet-composition">\n            <caption>Composition</caption>\n            <tr>\n              <td>Name</td>\n              <td>Symbol</td>\n              <td>Percentage</td>\n            </tr>\n          </table>\n        </tr>\n      </tbody>\n    </table>\n  ';
 
-	  $('#info-table').append(tableContent);
+	  $('#planet-info-table').append(tableContent);
 
 	  var elements = _.sortBy(planet.density, 'percentageVal').reverse();
-	  console.log("elements: ", elements);
 
 	  elements.forEach(function (elem) {
 	    var compositionString = '\n      <tr>\n        <td>' + elem.name + '</td>\n        <td>' + elem.symbol + '</td>\n        <td>' + elem.percentage + '</td>\n      </tr>\n    ';
@@ -100,18 +99,6 @@
 	function Vector(x, y) {
 	  this.x = x;
 	  this.y = y;
-	}
-
-	function spawnCluster() {
-	  var focal = new Vector(mouseInitX, mouseInitY),
-	      radius = 50;
-	  for (var i = 0; i < 100; i++) {
-	    var randomTheta = 2 * Math.PI * Math.random(),
-	        u = Math.random() * 100 + Math.random() * 100,
-	        r = u > 100 ? 200 - u : u,
-	        location = new Vector(r * Math.cos(randomTheta) + focal.x, r * Math.sin(randomTheta) + focal.y);
-	    planets.push(newPlanet({ null: null, x: location.x / zoomScale, y: location.y / zoomScale }));
-	  }
 	}
 
 	function drawPlanets(p) {
@@ -164,7 +151,7 @@
 	  ctx.canvas.height = window.innerHeight;
 
 	  $("#hide-info-button").click(function (e) {
-	    $("#info-table").toggle();
+	    $("#planet-info-table").toggle();
 	  });
 
 	  $("#canvas").mousedown(function (e) {
@@ -202,9 +189,6 @@
 	    if (e.which === 16) {
 	      shiftPressed = true;
 	    }
-	    if (e.which === 32) {
-	      spawnCluster();
-	    }
 	  });
 
 	  $('body').keyup(function (e) {
@@ -224,7 +208,6 @@
 	      gravityCalc(planets);
 	      steps++;
 	    }
-	    if (tracking) {}
 	  }, 15);
 	});
 
@@ -16511,7 +16494,7 @@
 
 
 	// module
-	exports.push([module.id, "body {\n  background-color: black; }\n\n#space {\n  z-index: 1;\n  height: 100%;\n  height: 100vh;\n  width: 100%;\n  width: 100vw;\n  background-color: black; }\n\n#info-table {\n  border-color: 1px solid white;\n  position: absolute;\n  z-index: 100;\n  top: 0;\n  right: 0;\n  width: 300px;\n  height: 300px; }\n  #info-table * {\n    color: white; }\n  #info-table table {\n    position: relative;\n    width: 100%; }\n  #info-table #planet-composition {\n    margin: 20px 0px 20px 0px; }\n    #info-table #planet-composition tr {\n      margin-top: 10px; }\n\n#hide-info-button {\n  border: 1px solid white;\n  background-color: black;\n  color: white;\n  position: absolute;\n  z-index: 100;\n  top: 100;\n  left: 100;\n  width: 150px;\n  height: 40px;\n  cursor: pointer;\n  outline: none; }\n\n#planet-form {\n  z-index: 1000;\n  margin-top: 40px; }\n  #planet-form h1 {\n    color: white; }\n  #planet-form input {\n    margin-top: 10px; }\n  #planet-form button {\n    margin-top: 10px; }\n", ""]);
+	exports.push([module.id, "body {\n  background-color: black; }\n\n#space {\n  z-index: 1;\n  height: 100%;\n  height: 100vh;\n  width: 100%;\n  width: 100vw;\n  background-color: black; }\n\n#info-container {\n  display: flex;\n  flex-direction: column; }\n  #info-container #instructions {\n    position: absolute;\n    top: 40px;\n    color: white; }\n\n#planet-info-table {\n  border-color: 1px solid white;\n  position: absolute;\n  z-index: 100;\n  top: 0;\n  right: 0;\n  width: 300px;\n  height: 300px; }\n  #planet-info-table * {\n    color: white; }\n  #planet-info-table table {\n    position: relative;\n    width: 100%; }\n  #planet-info-table #planet-composition {\n    margin: 20px 0px 20px 0px; }\n    #planet-info-table #planet-composition tr {\n      margin-top: 10px; }\n\n#hide-info-button {\n  border: 1px solid white;\n  background-color: black;\n  color: white;\n  position: absolute;\n  z-index: 100;\n  top: 100;\n  left: 100;\n  width: 150px;\n  height: 40px;\n  cursor: pointer;\n  outline: none; }\n\n#planet-form {\n  z-index: 1000;\n  margin-top: 40px; }\n  #planet-form h1 {\n    color: white; }\n  #planet-form input {\n    margin-top: 10px; }\n  #planet-form button {\n    margin-top: 10px; }\n", ""]);
 
 	// exports
 
