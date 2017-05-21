@@ -12,7 +12,17 @@ body{
   background-color: black;
 }
 
-#info-table{
+#info-container {
+  display: flex;
+  flex-direction: column;
+  #instructions {
+    position: absolute;
+    top: 40px;
+    color: white;
+  }
+}
+
+#planet-info-table{
   border-color: 1px solid white;
   position: absolute;
   z-index: 100;
@@ -47,4 +57,18 @@ body{
   height: 40px;
   cursor: pointer;
   outline: none;
+}
+
+#planet-form{
+  z-index: 1000;
+  margin-top: 40px;
+  h1{
+    color: white;
+  }
+  input{
+    margin-top: 10px;
+  }
+  button{
+    margin-top: 10px;
+  }
 }

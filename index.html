@@ -6,12 +6,31 @@
   <!-- <link rel="stylesheet" href="style.css"> -->
 </head>
 <body id="main">
-  <button id="hide-info-button">
-    <p>TOGGLE PLANET INFO</p>
-  </button>
+  <div id="info-container">
+    <button id="hide-info-button">
+      <p>TOGGLE PLANET INFO</p>
+    </button>
+    <div id="instructions">
+      <p>Click to create a planet</p>
+      <p>Click, drag, and release to create a planet with motion</p>
+    </div>
+  </div>
+  <!-- <div id="planet-form">
+    <h1>Planet Builder</h1>
+    <input type="text" id="name" placeholder="name"></input>
+    <br>
+    <input type="number" id="radius" placeholder="radius (km2)"></input><span>km2</span>
+    <br>
+    <input type="text" id="elements" placeholder="element"></input>
+    <br>
+    <button id="add-element-button">
+      <p>Add Element</p>
+    </button>
+    <div id="element-list"></div>
+  </div> -->
   <canvas id="canvas">
   </canvas>
-  <div id="info-table"></div>
+  <div id="planet-info-table"></div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
   <script src="bundle.js"></script>
